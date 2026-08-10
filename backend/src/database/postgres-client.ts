@@ -1,7 +1,8 @@
 import { Client } from 'pg';
 import { config } from '../config.js';
+import { logger } from '../logger.js';
 
-console.log('Connecting to database...');
+logger.info('Connecting to Postgres database');
 
 const dbConfig = {
   host: config.database.host,
@@ -10,7 +11,7 @@ const dbConfig = {
   user: config.database.user,
   password: config.database.password,
 };
-console.log('Database configuration:', dbConfig);
+logger.debug({ dbConfig: { ...dbConfig, password: '******' } }, 'Database configuration');
 
 const client = new Client(dbConfig);
 

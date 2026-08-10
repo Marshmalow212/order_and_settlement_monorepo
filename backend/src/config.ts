@@ -6,6 +6,7 @@ export interface AppConfig {
   env: string;
   server: {
     port: number;
+    version: string;
   };
   database: {
     host: string;
@@ -26,6 +27,7 @@ export const config: AppConfig = {
   env: process.env.NODE_ENV ?? 'development',
   server: {
     port: Number(process.env.PORT ?? 3000),
+    version: process.env.API_VERSION ?? 'v1',
   },
   database: {
     host: process.env.POSTGRES_HOST ?? 'postgresdb',

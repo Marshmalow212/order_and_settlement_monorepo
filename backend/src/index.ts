@@ -2,42 +2,40 @@ import express from 'express';
 import cors from 'cors';
 import { json, urlencoded } from 'express';
 import { config } from './config.js';
-import { OrderRepository } from './repositories/order.repository.js';
-import { OrderService } from './services/order.service.js';
-import { orderRouter } from './routes/order.routes.js';
+import { mainRouter } from './routes/main.router.js';
 import { postgresClient } from './database/postgres-client.js';
 import { redisClient } from './database/redis-client.js';
+import { logger, loggerMiddleware } from './logger.js';
 
 const app = express();
 const port = config.server.port;
 
+app.use(loggerMiddleware);
 app.use(cors());
 app.use(json());
 app.use(urlencoded({ extended: true }));
 
-app.use('/orders', orderRouter);
+app.use(`/api/${config.server.version}`, mainRouter);
 
 app.get('/', (_req, res) => {
   res.json({ status: 'ok', service: 'order-settlement-backend' });
 });
 
 const start = async () => {
-if (config.env === 'development') {
-  console.log('Running in development mode');
-  console.log('Environment variables:', config);
-}
+  logger.info({ env: config.env, port }, 'Starting application');
+
   await postgresClient.connect();
   await redisClient.connect();
 
   app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
+    logger.info({ url: `http://localhost:${port}` }, 'Server running');
   });
 };
 
 start().catch((error) => {
-  console.error('Unable to start server', error);
-  if (process.env.NODE_ENV === 'development') {
-    console.log('error details', error.stack);
+  logger.error({ err: error }, 'Unable to start server');
+  if (config.env === 'development') {
+    logger.debug({ stack: error.stack }, 'Startup error details');
   }
   process.exit(1);
 });
