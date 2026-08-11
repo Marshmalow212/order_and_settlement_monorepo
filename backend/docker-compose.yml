@@ -1,11 +1,11 @@
-version: '3.9'
 
 services:
-  app:
+  backend:
+    container_name: order-settlement-backend
     build:
       context: .
       dockerfile: Dockerfile
-    image: order-settlement-backend:dev
+    image: order-settlement-backend:latest
     ports:
       - '7101:3000'
       - '7102:9229'
