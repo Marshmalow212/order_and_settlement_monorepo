@@ -2,7 +2,8 @@ import { Geist, Geist_Mono, Public_Sans } from "next/font/google"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import { cn } from "@/lib/utils";
+import { ReduxProvider } from "@/redux/provider"
+import { cn } from "@/lib/utils"
 
 const publicSans = Public_Sans({subsets:['latin'],variable:'--font-sans'})
 
@@ -23,7 +24,9 @@ export default function RootLayout({
       className={cn("antialiased", fontMono.variable, "font-sans", publicSans.variable)}
     >
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ReduxProvider>
+          <ThemeProvider>{children}</ThemeProvider>
+        </ReduxProvider>
       </body>
     </html>
   )
