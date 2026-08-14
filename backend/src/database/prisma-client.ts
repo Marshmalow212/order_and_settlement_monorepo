@@ -4,7 +4,11 @@ import { config } from '../config.js';
 
 const connectionString = config.database.url;
 
-const adapter = new PrismaPg({connectionString});
+const adapter = new PrismaPg({connectionString,
+    ssl:{
+        rejectUnauthorized: false
+    }
+});
 const prisma = new PrismaClient({ adapter });
 
 export { prisma };
