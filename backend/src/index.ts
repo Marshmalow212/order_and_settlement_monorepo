@@ -2,10 +2,16 @@ import express from 'express';
 import cors from 'cors';
 import { json, urlencoded } from 'express';
 import { config } from './config.js';
-import { mainRouter } from './routes/main.router.js';
-import { postgresClient } from './database/postgres-client.js';
-import { redisClient } from './database/redis-client.js';
+import { prisma } from './database/prisma-client.js';
 import { logger, loggerMiddleware } from './logger.js';
+import { mainRouter } from './routes/main.router.js';
+import { AuditLogRepository } from './repositories/audit-log.repository.js';
+import { LineItemRepository } from './repositories/line-item.repository.js';
+import { OrderRepository } from './repositories/order.repository.js';
+import { PaymentTransactionRepository } from './repositories/payment-transaction.repository.js';
+import { UserRepository } from './repositories/user.repository.js';
+import { swaggerSpec } from './swagger.js';
+import swaggerUi from 'swagger-ui-express';
 
 const app = express();
 const port = config.server.port;
@@ -16,6 +22,7 @@ app.use(json());
 app.use(urlencoded({ extended: true }));
 
 app.use(`/api/${config.server.version}`, mainRouter);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get('/', (_req, res) => {
   res.json({ status: 'ok', service: 'order-settlement-backend' });
@@ -24,8 +31,14 @@ app.get('/', (_req, res) => {
 const start = async () => {
   logger.info({ env: config.env, port }, 'Starting application');
 
-  await postgresClient.connect();
-  await redisClient.connect();
+  await prisma.$connect();
+  await Promise.all([
+    new OrderRepository().init(),
+    new UserRepository().init(),
+    new LineItemRepository().init(),
+    new PaymentTransactionRepository().init(),
+    new AuditLogRepository().init(),
+  ]);
 
   app.listen(port, () => {
     logger.info({ url: `http://localhost:${port}` }, 'Server running');

@@ -14,6 +14,7 @@ export interface AppConfig {
     database: string;
     user: string;
     password: string;
+    url: string;
   };
   redis: {
     host: string;
@@ -35,6 +36,7 @@ export const config: AppConfig = {
     database: process.env.POSTGRES_DB ?? 'order_settlement_db',
     user: process.env.POSTGRES_USER ?? 'marsh_local',
     password: process.env.POSTGRES_PASSWORD ?? 'Marsh@123',
+    url: process.env.DATABASE_URL ?? 'postgresql://marsh_local:Marsh@123@localhost:5432/order_settlement_db?schema=public',
   },
   redis: {
     host: process.env.REDIS_HOST ?? 'redis',

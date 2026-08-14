@@ -1,0 +1,52 @@
+services:
+  backend:
+    container_name: order-settlement-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: order-settlement-backend:latest
+    ports:
+      - "7101:3001"
+      - "7102:9229"
+    volumes:
+      - ./backend:/usr/src/app
+    command: sh -c "npm install && npm run dev"
+    depends_on:
+      - db
+    networks:
+      - order-settlement-network
+
+  frontend:
+    container_name: order-settlement-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: order-settlement-frontend:latest
+    ports:
+      - "7103:3000"
+    volumes:
+      - ./frontend:/app
+    command: sh -c "npm install && npm run dev"
+    networks:
+      - order-settlement-network
+
+  db:
+    image: postgres:18-alpine
+    container_name: order-settlement-db
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_EXPOSE_PORT}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql:rw
+    networks:
+      - order-settlement-network
+
+networks:
+  order-settlement-network:
+    driver: bridge
+
+volumes:
+  postgres-data:

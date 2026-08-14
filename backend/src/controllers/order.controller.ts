@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { OrderService } from '../services/order.service.js';
+import { IOrderService, OrderService } from '../services/order.service.js';
 
-const service = new OrderService();
+const service: IOrderService = new OrderService();
 
 export class OrderController {
   static async init() {
@@ -9,13 +9,23 @@ export class OrderController {
   }
 
   static async create(req: Request, res: Response) {
-    const { customerName, status, total } = req.body;
+    const { customerName, status, total, dueDate, lineItems } = req.body;
 
-    if (!customerName || !status || total == null) {
-      return res.status(400).json({ message: 'customerName, status, and total are required' });
+    if (!customerName) {
+      return res.status(400).json({ message: 'customerName is required' });
     }
 
-    const order = await service.createOrder({ customerName, status, total });
+    if (lineItems && (!Array.isArray(lineItems) || lineItems.length === 0)) {
+      return res.status(400).json({ message: 'lineItems must be a non-empty array when provided' });
+    }
+
+    const order = await service.createOrder({
+      customerName,
+      status,
+      total: total ?? 0,
+      dueDate,
+      lineItems,
+    });
     return res.status(201).json(order);
   }
 
@@ -36,5 +46,42 @@ export class OrderController {
     }
 
     return res.json(order);
+  }
+
+  static async update(req: Request, res: Response) {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id) || id <= 0) {
+      return res.status(400).json({ message: 'Invalid id parameter' });
+    }
+
+    const { customerName, status, total, amountPaid, dueDate, lineItems } = req.body;
+    const order = await service.updateOrder(id, {
+      customerName,
+      status,
+      total,
+      amountPaid,
+      dueDate,
+      lineItems,
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found or update is not allowed while order is not pending' });
+    }
+
+    return res.json(order);
+  }
+
+  static async remove(req: Request, res: Response) {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id) || id <= 0) {
+      return res.status(400).json({ message: 'Invalid id parameter' });
+    }
+
+    const deleted = await service.deleteOrder(id);
+    if (!deleted) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    return res.status(204).send();
   }
 }

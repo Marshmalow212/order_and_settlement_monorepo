@@ -1,33 +1,44 @@
-import { OrderRepository, Order } from '../repositories/order.repository.js';
-import { redisClient } from '../database/redis-client.js';
+import {
+  CreateOrderInput,
+  IOrderRepository,
+  Order,
+  OrderRepository,
+  UpdateOrderInput,
+} from '../repositories/order.repository.js';
 
-const ORDER_CACHE_KEY = 'orders:all';
+export interface IOrderService {
+  init(): Promise<void>;
+  createOrder(order: CreateOrderInput): Promise<Order>;
+  listOrders(): Promise<Order[]>;
+  getOrderById(id: number): Promise<Order | null>;
+  updateOrder(id: number, data: UpdateOrderInput): Promise<Order | null>;
+  deleteOrder(id: number): Promise<boolean>;
+}
 
-export class OrderService {
-  constructor(private repository = new OrderRepository()) {}
+export class OrderService implements IOrderService {
+  constructor(private repository: IOrderRepository = new OrderRepository()) {}
 
   async init() {
     await this.repository.init();
   }
 
-  async createOrder(order: Omit<Order, 'id' | 'createdAt'>): Promise<Order> {
-    const created = await this.repository.create(order);
-    await redisClient.del(ORDER_CACHE_KEY);
-    return created;
+  async createOrder(order: CreateOrderInput): Promise<Order> {
+    return this.repository.create(order);
   }
 
   async listOrders(): Promise<Order[]> {
-    const cached = await redisClient.get(ORDER_CACHE_KEY);
-    if (cached) {
-      return JSON.parse(cached) as Order[];
-    }
-
-    const orders = await this.repository.findAll();
-    await redisClient.set(ORDER_CACHE_KEY, JSON.stringify(orders), { EX: 30 });
-    return orders;
+    return this.repository.findAll();
   }
 
   async getOrderById(id: number): Promise<Order | null> {
     return this.repository.findById(id);
+  }
+
+  async updateOrder(id: number, data: UpdateOrderInput): Promise<Order | null> {
+    return this.repository.update(id, data);
+  }
+
+  async deleteOrder(id: number): Promise<boolean> {
+    return this.repository.delete(id);
   }
 }
