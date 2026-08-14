@@ -1,0 +1,26 @@
+
+services:
+  backend:
+    container_name: order-settlement-backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: order-settlement-backend:latest
+    ports:
+      - '7101:3000'
+      - '7102:9229'
+    # environment:
+    #   - NODE_ENV=development
+    #   - POSTGRES_HOST=172.18.0.1
+    #   - POSTGRES_PORT=7010
+    #   - POSTGRES_DB=order_settlement_db
+    #   - POSTGRES_USER=marsh_local
+    #   - POSTGRES_PASSWORD=Marsh@123
+    #   - REDIS_HOST=172.18.0.1
+    #   - REDIS_PORT=7014
+    #   - REDIS_USER=marsh_local
+    #   - REDIS_PASSWORD=secret
+    volumes:
+      - ./:/usr/src/app
+      - ./node_modules:/usr/src/app/node_modules
+    command: sh -c "if [ ! -f /usr/src/app/node_modules ]; then npm install; fi && npm run dev"

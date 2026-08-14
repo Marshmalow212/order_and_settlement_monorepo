@@ -1,0 +1,13 @@
+
+services:
+  frontend:
+    container_name: order-settlement-frontend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: order-settlement-frontend:latest
+    ports:
+      - '7103:3000'
+    volumes:
+      - ./:/app
+    command: sh -c "npm install && npm run dev"
