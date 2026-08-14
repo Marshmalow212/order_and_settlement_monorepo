@@ -478,48 +478,6 @@ export type AuditLogSumOrderByAggregateInput = {
   status?: Prisma.SortOrder
 }
 
-export type AuditLogCreateNestedManyWithoutOrderInput = {
-  create?: Prisma.XOR<Prisma.AuditLogCreateWithoutOrderInput, Prisma.AuditLogUncheckedCreateWithoutOrderInput> | Prisma.AuditLogCreateWithoutOrderInput[] | Prisma.AuditLogUncheckedCreateWithoutOrderInput[]
-  connectOrCreate?: Prisma.AuditLogCreateOrConnectWithoutOrderInput | Prisma.AuditLogCreateOrConnectWithoutOrderInput[]
-  createMany?: Prisma.AuditLogCreateManyOrderInputEnvelope
-  connect?: Prisma.AuditLogWhereUniqueInput | Prisma.AuditLogWhereUniqueInput[]
-}
-
-export type AuditLogUncheckedCreateNestedManyWithoutOrderInput = {
-  create?: Prisma.XOR<Prisma.AuditLogCreateWithoutOrderInput, Prisma.AuditLogUncheckedCreateWithoutOrderInput> | Prisma.AuditLogCreateWithoutOrderInput[] | Prisma.AuditLogUncheckedCreateWithoutOrderInput[]
-  connectOrCreate?: Prisma.AuditLogCreateOrConnectWithoutOrderInput | Prisma.AuditLogCreateOrConnectWithoutOrderInput[]
-  createMany?: Prisma.AuditLogCreateManyOrderInputEnvelope
-  connect?: Prisma.AuditLogWhereUniqueInput | Prisma.AuditLogWhereUniqueInput[]
-}
-
-export type AuditLogUpdateManyWithoutOrderNestedInput = {
-  create?: Prisma.XOR<Prisma.AuditLogCreateWithoutOrderInput, Prisma.AuditLogUncheckedCreateWithoutOrderInput> | Prisma.AuditLogCreateWithoutOrderInput[] | Prisma.AuditLogUncheckedCreateWithoutOrderInput[]
-  connectOrCreate?: Prisma.AuditLogCreateOrConnectWithoutOrderInput | Prisma.AuditLogCreateOrConnectWithoutOrderInput[]
-  upsert?: Prisma.AuditLogUpsertWithWhereUniqueWithoutOrderInput | Prisma.AuditLogUpsertWithWhereUniqueWithoutOrderInput[]
-  createMany?: Prisma.AuditLogCreateManyOrderInputEnvelope
-  set?: Prisma.AuditLogWhereUniqueInput | Prisma.AuditLogWhereUniqueInput[]
-  disconnect?: Prisma.AuditLogWhereUniqueInput | Prisma.AuditLogWhereUniqueInput[]
-  delete?: Prisma.AuditLogWhereUniqueInput | Prisma.AuditLogWhereUniqueInput[]
-  connect?: Prisma.AuditLogWhereUniqueInput | Prisma.AuditLogWhereUniqueInput[]
-  update?: Prisma.AuditLogUpdateWithWhereUniqueWithoutOrderInput | Prisma.AuditLogUpdateWithWhereUniqueWithoutOrderInput[]
-  updateMany?: Prisma.AuditLogUpdateManyWithWhereWithoutOrderInput | Prisma.AuditLogUpdateManyWithWhereWithoutOrderInput[]
-  deleteMany?: Prisma.AuditLogScalarWhereInput | Prisma.AuditLogScalarWhereInput[]
-}
-
-export type AuditLogUncheckedUpdateManyWithoutOrderNestedInput = {
-  create?: Prisma.XOR<Prisma.AuditLogCreateWithoutOrderInput, Prisma.AuditLogUncheckedCreateWithoutOrderInput> | Prisma.AuditLogCreateWithoutOrderInput[] | Prisma.AuditLogUncheckedCreateWithoutOrderInput[]
-  connectOrCreate?: Prisma.AuditLogCreateOrConnectWithoutOrderInput | Prisma.AuditLogCreateOrConnectWithoutOrderInput[]
-  upsert?: Prisma.AuditLogUpsertWithWhereUniqueWithoutOrderInput | Prisma.AuditLogUpsertWithWhereUniqueWithoutOrderInput[]
-  createMany?: Prisma.AuditLogCreateManyOrderInputEnvelope
-  set?: Prisma.AuditLogWhereUniqueInput | Prisma.AuditLogWhereUniqueInput[]
-  disconnect?: Prisma.AuditLogWhereUniqueInput | Prisma.AuditLogWhereUniqueInput[]
-  delete?: Prisma.AuditLogWhereUniqueInput | Prisma.AuditLogWhereUniqueInput[]
-  connect?: Prisma.AuditLogWhereUniqueInput | Prisma.AuditLogWhereUniqueInput[]
-  update?: Prisma.AuditLogUpdateWithWhereUniqueWithoutOrderInput | Prisma.AuditLogUpdateWithWhereUniqueWithoutOrderInput[]
-  updateMany?: Prisma.AuditLogUpdateManyWithWhereWithoutOrderInput | Prisma.AuditLogUpdateManyWithWhereWithoutOrderInput[]
-  deleteMany?: Prisma.AuditLogScalarWhereInput | Prisma.AuditLogScalarWhereInput[]
-}
-
 export type AuditLogCreateNestedManyWithoutUserInput = {
   create?: Prisma.XOR<Prisma.AuditLogCreateWithoutUserInput, Prisma.AuditLogUncheckedCreateWithoutUserInput> | Prisma.AuditLogCreateWithoutUserInput[] | Prisma.AuditLogUncheckedCreateWithoutUserInput[]
   connectOrCreate?: Prisma.AuditLogCreateOrConnectWithoutUserInput | Prisma.AuditLogCreateOrConnectWithoutUserInput[]
@@ -562,74 +520,46 @@ export type AuditLogUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.AuditLogScalarWhereInput | Prisma.AuditLogScalarWhereInput[]
 }
 
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
+export type AuditLogCreateNestedManyWithoutOrderInput = {
+  create?: Prisma.XOR<Prisma.AuditLogCreateWithoutOrderInput, Prisma.AuditLogUncheckedCreateWithoutOrderInput> | Prisma.AuditLogCreateWithoutOrderInput[] | Prisma.AuditLogUncheckedCreateWithoutOrderInput[]
+  connectOrCreate?: Prisma.AuditLogCreateOrConnectWithoutOrderInput | Prisma.AuditLogCreateOrConnectWithoutOrderInput[]
+  createMany?: Prisma.AuditLogCreateManyOrderInputEnvelope
+  connect?: Prisma.AuditLogWhereUniqueInput | Prisma.AuditLogWhereUniqueInput[]
 }
 
-export type AuditLogCreateWithoutOrderInput = {
-  amount: runtime.Decimal | runtime.DecimalJsLike | number | string
-  items: number
-  status: number
-  last_payment_date?: Date | string | null
-  created_at?: Date | string
-  updated_at?: Date | string
-  user?: Prisma.UserCreateNestedOneWithoutAudit_logsInput
+export type AuditLogUncheckedCreateNestedManyWithoutOrderInput = {
+  create?: Prisma.XOR<Prisma.AuditLogCreateWithoutOrderInput, Prisma.AuditLogUncheckedCreateWithoutOrderInput> | Prisma.AuditLogCreateWithoutOrderInput[] | Prisma.AuditLogUncheckedCreateWithoutOrderInput[]
+  connectOrCreate?: Prisma.AuditLogCreateOrConnectWithoutOrderInput | Prisma.AuditLogCreateOrConnectWithoutOrderInput[]
+  createMany?: Prisma.AuditLogCreateManyOrderInputEnvelope
+  connect?: Prisma.AuditLogWhereUniqueInput | Prisma.AuditLogWhereUniqueInput[]
 }
 
-export type AuditLogUncheckedCreateWithoutOrderInput = {
-  id?: number
-  userId?: number | null
-  amount: runtime.Decimal | runtime.DecimalJsLike | number | string
-  items: number
-  status: number
-  last_payment_date?: Date | string | null
-  created_at?: Date | string
-  updated_at?: Date | string
+export type AuditLogUpdateManyWithoutOrderNestedInput = {
+  create?: Prisma.XOR<Prisma.AuditLogCreateWithoutOrderInput, Prisma.AuditLogUncheckedCreateWithoutOrderInput> | Prisma.AuditLogCreateWithoutOrderInput[] | Prisma.AuditLogUncheckedCreateWithoutOrderInput[]
+  connectOrCreate?: Prisma.AuditLogCreateOrConnectWithoutOrderInput | Prisma.AuditLogCreateOrConnectWithoutOrderInput[]
+  upsert?: Prisma.AuditLogUpsertWithWhereUniqueWithoutOrderInput | Prisma.AuditLogUpsertWithWhereUniqueWithoutOrderInput[]
+  createMany?: Prisma.AuditLogCreateManyOrderInputEnvelope
+  set?: Prisma.AuditLogWhereUniqueInput | Prisma.AuditLogWhereUniqueInput[]
+  disconnect?: Prisma.AuditLogWhereUniqueInput | Prisma.AuditLogWhereUniqueInput[]
+  delete?: Prisma.AuditLogWhereUniqueInput | Prisma.AuditLogWhereUniqueInput[]
+  connect?: Prisma.AuditLogWhereUniqueInput | Prisma.AuditLogWhereUniqueInput[]
+  update?: Prisma.AuditLogUpdateWithWhereUniqueWithoutOrderInput | Prisma.AuditLogUpdateWithWhereUniqueWithoutOrderInput[]
+  updateMany?: Prisma.AuditLogUpdateManyWithWhereWithoutOrderInput | Prisma.AuditLogUpdateManyWithWhereWithoutOrderInput[]
+  deleteMany?: Prisma.AuditLogScalarWhereInput | Prisma.AuditLogScalarWhereInput[]
 }
 
-export type AuditLogCreateOrConnectWithoutOrderInput = {
-  where: Prisma.AuditLogWhereUniqueInput
-  create: Prisma.XOR<Prisma.AuditLogCreateWithoutOrderInput, Prisma.AuditLogUncheckedCreateWithoutOrderInput>
-}
-
-export type AuditLogCreateManyOrderInputEnvelope = {
-  data: Prisma.AuditLogCreateManyOrderInput | Prisma.AuditLogCreateManyOrderInput[]
-  skipDuplicates?: boolean
-}
-
-export type AuditLogUpsertWithWhereUniqueWithoutOrderInput = {
-  where: Prisma.AuditLogWhereUniqueInput
-  update: Prisma.XOR<Prisma.AuditLogUpdateWithoutOrderInput, Prisma.AuditLogUncheckedUpdateWithoutOrderInput>
-  create: Prisma.XOR<Prisma.AuditLogCreateWithoutOrderInput, Prisma.AuditLogUncheckedCreateWithoutOrderInput>
-}
-
-export type AuditLogUpdateWithWhereUniqueWithoutOrderInput = {
-  where: Prisma.AuditLogWhereUniqueInput
-  data: Prisma.XOR<Prisma.AuditLogUpdateWithoutOrderInput, Prisma.AuditLogUncheckedUpdateWithoutOrderInput>
-}
-
-export type AuditLogUpdateManyWithWhereWithoutOrderInput = {
-  where: Prisma.AuditLogScalarWhereInput
-  data: Prisma.XOR<Prisma.AuditLogUpdateManyMutationInput, Prisma.AuditLogUncheckedUpdateManyWithoutOrderInput>
-}
-
-export type AuditLogScalarWhereInput = {
-  AND?: Prisma.AuditLogScalarWhereInput | Prisma.AuditLogScalarWhereInput[]
-  OR?: Prisma.AuditLogScalarWhereInput[]
-  NOT?: Prisma.AuditLogScalarWhereInput | Prisma.AuditLogScalarWhereInput[]
-  id?: Prisma.IntFilter<"AuditLog"> | number
-  userId?: Prisma.IntNullableFilter<"AuditLog"> | number | null
-  orderId?: Prisma.IntNullableFilter<"AuditLog"> | number | null
-  amount?: Prisma.DecimalFilter<"AuditLog"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  items?: Prisma.IntFilter<"AuditLog"> | number
-  status?: Prisma.IntFilter<"AuditLog"> | number
-  last_payment_date?: Prisma.DateTimeNullableFilter<"AuditLog"> | Date | string | null
-  created_at?: Prisma.DateTimeFilter<"AuditLog"> | Date | string
-  updated_at?: Prisma.DateTimeFilter<"AuditLog"> | Date | string
+export type AuditLogUncheckedUpdateManyWithoutOrderNestedInput = {
+  create?: Prisma.XOR<Prisma.AuditLogCreateWithoutOrderInput, Prisma.AuditLogUncheckedCreateWithoutOrderInput> | Prisma.AuditLogCreateWithoutOrderInput[] | Prisma.AuditLogUncheckedCreateWithoutOrderInput[]
+  connectOrCreate?: Prisma.AuditLogCreateOrConnectWithoutOrderInput | Prisma.AuditLogCreateOrConnectWithoutOrderInput[]
+  upsert?: Prisma.AuditLogUpsertWithWhereUniqueWithoutOrderInput | Prisma.AuditLogUpsertWithWhereUniqueWithoutOrderInput[]
+  createMany?: Prisma.AuditLogCreateManyOrderInputEnvelope
+  set?: Prisma.AuditLogWhereUniqueInput | Prisma.AuditLogWhereUniqueInput[]
+  disconnect?: Prisma.AuditLogWhereUniqueInput | Prisma.AuditLogWhereUniqueInput[]
+  delete?: Prisma.AuditLogWhereUniqueInput | Prisma.AuditLogWhereUniqueInput[]
+  connect?: Prisma.AuditLogWhereUniqueInput | Prisma.AuditLogWhereUniqueInput[]
+  update?: Prisma.AuditLogUpdateWithWhereUniqueWithoutOrderInput | Prisma.AuditLogUpdateWithWhereUniqueWithoutOrderInput[]
+  updateMany?: Prisma.AuditLogUpdateManyWithWhereWithoutOrderInput | Prisma.AuditLogUpdateManyWithWhereWithoutOrderInput[]
+  deleteMany?: Prisma.AuditLogScalarWhereInput | Prisma.AuditLogScalarWhereInput[]
 }
 
 export type AuditLogCreateWithoutUserInput = {
@@ -679,7 +609,32 @@ export type AuditLogUpdateManyWithWhereWithoutUserInput = {
   data: Prisma.XOR<Prisma.AuditLogUpdateManyMutationInput, Prisma.AuditLogUncheckedUpdateManyWithoutUserInput>
 }
 
-export type AuditLogCreateManyOrderInput = {
+export type AuditLogScalarWhereInput = {
+  AND?: Prisma.AuditLogScalarWhereInput | Prisma.AuditLogScalarWhereInput[]
+  OR?: Prisma.AuditLogScalarWhereInput[]
+  NOT?: Prisma.AuditLogScalarWhereInput | Prisma.AuditLogScalarWhereInput[]
+  id?: Prisma.IntFilter<"AuditLog"> | number
+  userId?: Prisma.IntNullableFilter<"AuditLog"> | number | null
+  orderId?: Prisma.IntNullableFilter<"AuditLog"> | number | null
+  amount?: Prisma.DecimalFilter<"AuditLog"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  items?: Prisma.IntFilter<"AuditLog"> | number
+  status?: Prisma.IntFilter<"AuditLog"> | number
+  last_payment_date?: Prisma.DateTimeNullableFilter<"AuditLog"> | Date | string | null
+  created_at?: Prisma.DateTimeFilter<"AuditLog"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"AuditLog"> | Date | string
+}
+
+export type AuditLogCreateWithoutOrderInput = {
+  amount: runtime.Decimal | runtime.DecimalJsLike | number | string
+  items: number
+  status: number
+  last_payment_date?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  user?: Prisma.UserCreateNestedOneWithoutAudit_logsInput
+}
+
+export type AuditLogUncheckedCreateWithoutOrderInput = {
   id?: number
   userId?: number | null
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -690,36 +645,30 @@ export type AuditLogCreateManyOrderInput = {
   updated_at?: Date | string
 }
 
-export type AuditLogUpdateWithoutOrderInput = {
-  amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  items?: Prisma.IntFieldUpdateOperationsInput | number
-  status?: Prisma.IntFieldUpdateOperationsInput | number
-  last_payment_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneWithoutAudit_logsNestedInput
+export type AuditLogCreateOrConnectWithoutOrderInput = {
+  where: Prisma.AuditLogWhereUniqueInput
+  create: Prisma.XOR<Prisma.AuditLogCreateWithoutOrderInput, Prisma.AuditLogUncheckedCreateWithoutOrderInput>
 }
 
-export type AuditLogUncheckedUpdateWithoutOrderInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  items?: Prisma.IntFieldUpdateOperationsInput | number
-  status?: Prisma.IntFieldUpdateOperationsInput | number
-  last_payment_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+export type AuditLogCreateManyOrderInputEnvelope = {
+  data: Prisma.AuditLogCreateManyOrderInput | Prisma.AuditLogCreateManyOrderInput[]
+  skipDuplicates?: boolean
 }
 
-export type AuditLogUncheckedUpdateManyWithoutOrderInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  items?: Prisma.IntFieldUpdateOperationsInput | number
-  status?: Prisma.IntFieldUpdateOperationsInput | number
-  last_payment_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+export type AuditLogUpsertWithWhereUniqueWithoutOrderInput = {
+  where: Prisma.AuditLogWhereUniqueInput
+  update: Prisma.XOR<Prisma.AuditLogUpdateWithoutOrderInput, Prisma.AuditLogUncheckedUpdateWithoutOrderInput>
+  create: Prisma.XOR<Prisma.AuditLogCreateWithoutOrderInput, Prisma.AuditLogUncheckedCreateWithoutOrderInput>
+}
+
+export type AuditLogUpdateWithWhereUniqueWithoutOrderInput = {
+  where: Prisma.AuditLogWhereUniqueInput
+  data: Prisma.XOR<Prisma.AuditLogUpdateWithoutOrderInput, Prisma.AuditLogUncheckedUpdateWithoutOrderInput>
+}
+
+export type AuditLogUpdateManyWithWhereWithoutOrderInput = {
+  where: Prisma.AuditLogScalarWhereInput
+  data: Prisma.XOR<Prisma.AuditLogUpdateManyMutationInput, Prisma.AuditLogUncheckedUpdateManyWithoutOrderInput>
 }
 
 export type AuditLogCreateManyUserInput = {
@@ -757,6 +706,49 @@ export type AuditLogUncheckedUpdateWithoutUserInput = {
 export type AuditLogUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   orderId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  items?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.IntFieldUpdateOperationsInput | number
+  last_payment_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type AuditLogCreateManyOrderInput = {
+  id?: number
+  userId?: number | null
+  amount: runtime.Decimal | runtime.DecimalJsLike | number | string
+  items: number
+  status: number
+  last_payment_date?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type AuditLogUpdateWithoutOrderInput = {
+  amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  items?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.IntFieldUpdateOperationsInput | number
+  last_payment_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneWithoutAudit_logsNestedInput
+}
+
+export type AuditLogUncheckedUpdateWithoutOrderInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  items?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.IntFieldUpdateOperationsInput | number
+  last_payment_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type AuditLogUncheckedUpdateManyWithoutOrderInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   items?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.IntFieldUpdateOperationsInput | number

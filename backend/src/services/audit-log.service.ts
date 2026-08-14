@@ -9,7 +9,7 @@ import {
 export interface IAuditLogService {
   init(): Promise<void>;
   createAuditLog(input: CreateAuditLogInput): Promise<AuditLog>;
-  listAuditLogs(): Promise<AuditLog[]>;
+  listAuditLogs(userId?: number): Promise<AuditLog[]>;
   getAuditLogById(id: number): Promise<AuditLog | null>;
   getAuditLogsByUserId(userId: number): Promise<AuditLog[]>;
   getAuditLogsByUserAndOrderId(userId: number, orderId: number): Promise<AuditLog[]>;
@@ -28,8 +28,8 @@ export class AuditLogService implements IAuditLogService {
     return this.repository.create(input);
   }
 
-  async listAuditLogs(): Promise<AuditLog[]> {
-    return this.repository.findAll();
+  async listAuditLogs(userId?: number): Promise<AuditLog[]> {
+    return this.repository.findAll(userId);
   }
 
   async getAuditLogById(id: number): Promise<AuditLog | null> {

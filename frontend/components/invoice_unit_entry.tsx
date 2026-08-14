@@ -96,6 +96,7 @@ export default function InvoiceUnitEntry({
 
   const { fields, append, remove } = useFieldArray({ control, name: "line_items" })
   const lineItems = watch("line_items") ?? []
+  const nonEditableLines = mode === "edit" && initialValues && initialValues.status && initialValues.status !== "pending"
 
   useEffect(() => {
     reset({
@@ -127,6 +128,8 @@ export default function InvoiceUnitEntry({
     }, 0)
   }, [lineItems])
 
+  const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 })
+
   const amountPaid = Number(watch("amount_paid") ?? 0)
   const amountDue = Math.max(orderTotal - amountPaid, 0)
 
@@ -145,7 +148,7 @@ export default function InvoiceUnitEntry({
 
     const paid = Number(parsed.amount_paid)
 
-    onSubmit?.({
+    const result: any = {
       customer: parsed.customer,
       status: parsed.status,
       order_total: total,
@@ -153,12 +156,18 @@ export default function InvoiceUnitEntry({
       amount_due: Math.max(total - paid, 0),
       due_date: parsed.due_date,
       created_at: new Date().toISOString(),
-      line_items: parsed.line_items.map((item) => ({
+    }
+
+    // If editing a non-pending order, avoid sending line_items (backend disallows replacements)
+    if (!(mode === "edit" && initialValues && initialValues.status && initialValues.status !== "pending")) {
+      result.line_items = parsed.line_items.map((item) => ({
         product_name: item.product_name,
         quantity: item.quantity,
         unit_price: item.unit_price,
-      })),
-    })
+      }))
+    }
+
+    onSubmit?.(result)
   }
 
   if (mode === "view") {
@@ -248,11 +257,12 @@ export default function InvoiceUnitEntry({
       </div>
 
       <div className="space-y-3">
-        {fields.map((field, index) => (
+        <div className="pr-2">
+          {fields.map((field, index) => (
           <div key={field.id} className="rounded-md border border-border p-3">
             <div className="mb-2 flex items-center justify-between">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Line item {index + 1}</p>
-              {fields.length > 1 ? (
+              {fields.length > 1 && !nonEditableLines ? (
                 <button type="button" className="text-xs text-destructive hover:underline" onClick={() => remove(index)}>
                   Remove
                 </button>
@@ -265,6 +275,7 @@ export default function InvoiceUnitEntry({
                 <input
                   {...register(`line_items.${index}.product_name` as const)}
                   className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50"
+                  disabled={nonEditableLines}
                 />
                 {errors.line_items?.[index]?.product_name ? (
                   <p className="mt-1 text-xs text-destructive">{errors.line_items[index].product_name.message}</p>
@@ -279,6 +290,7 @@ export default function InvoiceUnitEntry({
                   min="1"
                   step="1"
                   className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50"
+                  disabled={nonEditableLines}
                 />
                 {errors.line_items?.[index]?.quantity ? (
                   <p className="mt-1 text-xs text-destructive">{errors.line_items[index].quantity.message}</p>
@@ -293,34 +305,49 @@ export default function InvoiceUnitEntry({
                   min="0"
                   step="0.01"
                   className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50"
+                  disabled={nonEditableLines}
                 />
                 {errors.line_items?.[index]?.unit_price ? (
                   <p className="mt-1 text-xs text-destructive">{errors.line_items[index].unit_price.message}</p>
                 ) : null}
               </div>
-            </div>
+              </div>
+
+              <div className="mt-2 flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Line subtotal</span>
+                <span className="font-medium">
+                  {(() => {
+                    const li = lineItems[index] ?? { quantity: "", unit_price: "" }
+                    const subtotal = Number(li.quantity ?? 0) * Number(li.unit_price ?? 0)
+                    return currency.format(Number.isFinite(subtotal) ? subtotal : 0)
+                  })()}
+                </span>
+              </div>
           </div>
-        ))}
+          ))}
+        </div>
       </div>
 
-      <div className="mt-2">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => append({ product_name: "", quantity: "", unit_price: "" })}
-        >
-          Add another item
-        </Button>
-      </div>
+      {!nonEditableLines ? (
+        <div className="mt-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => append({ product_name: "", quantity: "", unit_price: "" })}
+          >
+            Add another item
+          </Button>
+        </div>
+      ) : null}
 
       <div className="rounded-md border border-border bg-muted/40 p-3">
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">Subtotal</span>
-          <span className="font-medium">{orderTotal.toFixed(2)}</span>
+          <span className="font-medium">{currency.format(orderTotal)}</span>
         </div>
         <div className="mt-2 flex items-center justify-between text-sm">
           <span className="text-muted-foreground">Order total</span>
-          <span className="font-medium">{orderTotal.toFixed(2)}</span>
+          <span className="font-medium">{currency.format(orderTotal)}</span>
         </div>
       </div>
 

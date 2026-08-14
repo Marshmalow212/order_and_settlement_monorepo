@@ -15,8 +15,26 @@ datasource db {
 
 // Application models
 
+model User {
+  id         Int        @id @default(autoincrement())
+  name       String
+  email      String     @unique
+  password   String
+
+  audit_logs AuditLog[]
+  payment_transactions PaymentTransaction[]
+  orders Order[]
+
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+
+  @@map("users")
+}
+
 model Order {
   id            Int                  @id @default(autoincrement())
+  user           User?                @relation(fields: [userId], references: [id])
+  userId         Int?
   customer_name String
   due_date      DateTime?
   order_status  Int
@@ -52,6 +70,8 @@ model LineItem {
 
 model PaymentTransaction {
   id             Int      @id @default(autoincrement())
+  user           User?    @relation(fields: [userId], references: [id])
+  userId         Int?
   order          Order    @relation(fields: [orderId], references: [id])
   orderId        Int
   payment_amount Decimal
@@ -62,20 +82,6 @@ model PaymentTransaction {
   updated_at     DateTime @updatedAt
 
   @@map("payment_transactions")
-}
-
-model User {
-  id         Int        @id @default(autoincrement())
-  name       String
-  email      String     @unique
-  password   String
-
-  audit_logs AuditLog[]
-
-  created_at DateTime   @default(now())
-  updated_at DateTime   @updatedAt
-
-  @@map("users")
 }
 
 model AuditLog {

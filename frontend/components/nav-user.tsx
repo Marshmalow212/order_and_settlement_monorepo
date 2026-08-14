@@ -36,12 +36,6 @@ export function NavUser({
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <SidebarMenuButton size="lg" className="aria-expanded:bg-muted" />
-            }
-          >
             <Avatar className="size-8 rounded-lg grayscale">
               <AvatarImage src={user.avatar} alt={user.name} />
               <AvatarFallback className="rounded-lg">CN</AvatarFallback>
@@ -52,6 +46,12 @@ export function NavUser({
                 {user.email}
               </span>
             </div>
+        {/* <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <SidebarMenuButton size="lg" className="aria-expanded:bg-muted" />
+            }
+          >
             <HugeiconsIcon icon={MoreVerticalCircle01Icon} strokeWidth={2} className="ms-auto size-4" />
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -65,7 +65,7 @@ export function NavUser({
                 <div className="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
                   <Avatar className="size-8">
                     <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                    <AvatarFallback className="rounded-lg">TTI</AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-start text-sm leading-tight">
                     <span className="truncate font-medium">{user.name}</span>
@@ -97,7 +97,7 @@ export function NavUser({
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu> */}
       </SidebarMenuItem>
     </SidebarMenu>
   )

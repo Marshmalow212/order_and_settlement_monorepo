@@ -9,10 +9,11 @@ import {
 export interface IOrderService {
   init(): Promise<void>;
   createOrder(order: CreateOrderInput): Promise<Order>;
-  listOrders(): Promise<Order[]>;
+  listOrders(userId?: number): Promise<Order[]>;
   getOrderById(id: number): Promise<Order | null>;
   updateOrder(id: number, data: UpdateOrderInput): Promise<Order | null>;
   deleteOrder(id: number): Promise<boolean>;
+  operationSummary(userId: number): Promise<import('../repositories/order.repository.js').OperationSummary>;
 }
 
 export class OrderService implements IOrderService {
@@ -26,8 +27,8 @@ export class OrderService implements IOrderService {
     return this.repository.create(order);
   }
 
-  async listOrders(): Promise<Order[]> {
-    return this.repository.findAll();
+  async listOrders(userId?: number): Promise<Order[]> {
+    return this.repository.findAll(userId);
   }
 
   async getOrderById(id: number): Promise<Order | null> {
@@ -40,5 +41,9 @@ export class OrderService implements IOrderService {
 
   async deleteOrder(id: number): Promise<boolean> {
     return this.repository.delete(id);
+  }
+
+  async operationSummary(userId: number): Promise<import('../repositories/order.repository.js').OperationSummary> {
+    return this.repository.operationSummary(userId);
   }
 }

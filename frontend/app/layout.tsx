@@ -2,6 +2,7 @@ import { Geist, Geist_Mono, Public_Sans } from "next/font/google"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/sonner"
 import { ReduxProvider } from "@/redux/provider"
 import { cn } from "@/lib/utils"
 
@@ -26,6 +27,7 @@ export default function RootLayout({
       <body>
         <ReduxProvider>
           <ThemeProvider>{children}</ThemeProvider>
+          <Toaster />
         </ReduxProvider>
       </body>
     </html>

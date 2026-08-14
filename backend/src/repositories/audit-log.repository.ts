@@ -33,7 +33,7 @@ export interface UpdateAuditLogInput {
 export interface IAuditLogRepository {
   init(): Promise<void>;
   create(input: CreateAuditLogInput): Promise<AuditLog>;
-  findAll(): Promise<AuditLog[]>;
+  findAll(userId?: number): Promise<AuditLog[]>;
   findById(id: number): Promise<AuditLog | null>;
   findByUserId(userId: number): Promise<AuditLog[]>;
   findByUserIdAndOrderId(userId: number, orderId: number): Promise<AuditLog[]>;
@@ -61,8 +61,10 @@ export class AuditLogRepository implements IAuditLogRepository {
     return this.mapRow(log);
   }
 
-  async findAll(): Promise<AuditLog[]> {
-    const logs = await prisma.auditLog.findMany({ orderBy: { created_at: 'desc' } });
+  findAll(userId?: number): Promise<AuditLog[]>;
+
+  async findAll(userId?: number): Promise<AuditLog[]> {
+    const logs = await prisma.auditLog.findMany({ where: userId ? { userId } : undefined, orderBy: { created_at: 'desc' } });
     return logs.map(this.mapRow);
   }
 

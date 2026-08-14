@@ -6,7 +6,8 @@ import InvoiceUnitEntry, { type InvoiceEntryValues } from "@/components/invoice_
 import { AppSidebar } from "@/components/app-sidebar"
 import { Button } from "@/components/ui/button"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
-import { addOrder, archiveOrders, setOrders, updateOrder, type OrderRecord } from "@/redux/features/orders/ordersSlice"
+import type { OrderRecord } from "@/redux/reducers/orders"
+import { fetchOrdersForUser, createOrder, updateOrderById, archiveOrdersThunk, fetchOrderById } from "@/redux/thunks/ordersThunks"
 import {
   Dialog,
   DialogContent,
@@ -16,65 +17,9 @@ import {
 } from "@/components/ui/dialog"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import PaymentModal from "@/components/payments/PaymentModal"
 
 type OrderStatus = InvoiceEntryValues["status"]
-
-const initialOrders: OrderRecord[] = [
-  {
-    id: 1,
-    customer: "Northwind Traders",
-    status: "pending",
-    order_total: 5200,
-    amount_paid: 0,
-    amount_due: 5200,
-    due_date: "2026-08-20",
-  },
-  {
-    id: 2,
-    customer: "Blue Peak Labs",
-    status: "partially_paid",
-    order_total: 3200,
-    amount_paid: 1600,
-    amount_due: 1600,
-    due_date: "2026-08-18",
-  },
-  {
-    id: 3,
-    customer: "Cedar & Co.",
-    status: "paid",
-    order_total: 4100,
-    amount_paid: 4100,
-    amount_due: 0,
-    due_date: "2026-08-10",
-  },
-  {
-    id: 4,
-    customer: "Harbor Systems",
-    status: "overdue",
-    order_total: 2800,
-    amount_paid: 600,
-    amount_due: 2200,
-    due_date: "2026-07-28",
-  },
-  {
-    id: 5,
-    customer: "Aster Industries",
-    status: "archieve",
-    order_total: 1950,
-    amount_paid: 1950,
-    amount_due: 0,
-    due_date: "2026-06-15",
-  },
-  {
-    id: 6,
-    customer: "Summit Retail",
-    status: "pending",
-    order_total: 8750,
-    amount_paid: 0,
-    amount_due: 8750,
-    due_date: "2026-08-25",
-  },
-]
 
 const statusLabels: Record<OrderStatus, string> = {
   pending: "Pending",
@@ -111,10 +56,13 @@ export default function Page() {
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<"create" | "edit" | "view">("create")
   const [activeOrder, setActiveOrder] = useState<OrderRecord | null>(null)
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false)
+  const [paymentOrderId, setPaymentOrderId] = useState<number | null>(null)
 
   useEffect(() => {
-    dispatch(setOrders(initialOrders))
-  }, [dispatch])
+    // fetch orders related to userId 1 via audit logs
+    dispatch(fetchOrdersForUser(1) as any)
+  }, [])
 
   useEffect(() => {
     const modalParam = searchParams.get("modal")
@@ -141,10 +89,25 @@ export default function Page() {
     setSelectedIds((current) => (allSelected ? current.filter((id) => !currentPageIds.includes(id)) : [...current, ...currentPageIds.filter((id) => !current.includes(id))]))
   }
 
-  const openModal = (mode: "create" | "edit" | "view", order?: OrderRecord) => {
+  const openModal = async (mode: "create" | "edit" | "view", order?: OrderRecord) => {
     setModalMode(mode)
-    setActiveOrder(order ?? null)
     setModalOpen(true)
+    if (mode === "create") {
+      setActiveOrder(null)
+      return
+    }
+
+    if (order && order.id) {
+      try {
+        const fresh = (await dispatch(fetchOrderById(order.id) as any)) as OrderRecord
+        setActiveOrder(fresh ?? order)
+      } catch (e) {
+        // fallback to list item if fetch fails
+        setActiveOrder(order ?? null)
+      }
+    } else {
+      setActiveOrder(order ?? null)
+    }
   }
 
   const closeModal = () => {
@@ -155,30 +118,48 @@ export default function Page() {
     }
   }
 
-  const archiveSelected = () => {
-    if (!selectedIds.length) {
-      return
+  const archiveSelected = async () => {
+    if (!selectedIds.length) return
+    try {
+      await dispatch(archiveOrdersThunk(selectedIds) as any)
+      setSelectedIds([])
+    } catch (e) {
+      // ignore for now
     }
-
-    dispatch(archiveOrders(selectedIds))
-    setSelectedIds([])
   }
 
-  const saveOrder = (values: InvoiceEntryValues) => {
-    if (modalMode === "edit" && activeOrder) {
-      dispatch(updateOrder({ ...activeOrder, ...values, id: activeOrder.id }))
-      closeModal()
-      return
-    }
+  const saveOrder = async (values: InvoiceEntryValues) => {
+    try {
+      if (modalMode === "edit" && activeOrder) {
+        // Build a clean payload matching backend expectations
+        const payload: any = {}
+        if (values.customer) payload.customerName = values.customer
+        if (values.status) payload.status = values.status
+        if (values.order_total ?? values.order_total === 0) payload.total = values.order_total
+        if (values.due_date) payload.dueDate = values.due_date
 
-    const nextOrder: OrderRecord = {
-      id: Date.now(),
-      ...values,
+        // Include line items only when order is pending (backend requires this)
+        const effectiveStatus = values.status ?? activeOrder.status
+        if (values.line_items && values.line_items.length && String(effectiveStatus) === "pending") {
+          payload.lineItems = values.line_items.map((li) => ({
+            description: li.product_name,
+            unitPrice: Number(li.unit_price),
+            quantity: Number(li.quantity),
+          }))
+        }
+
+        await dispatch(updateOrderById(activeOrder.id, payload) as any)
+        closeModal()
+        return
+      }
+
+      await dispatch(createOrder(values as any) as any)
+      setModalOpen(false)
+      setActiveOrder(null)
+      router.push("/orders")
+    } catch (e) {
+      // handle errors (toast?)
     }
-    dispatch(addOrder(nextOrder))
-    setModalOpen(false)
-    setActiveOrder(null)
-    router.push("/orders")
   }
 
   return (
@@ -253,10 +234,10 @@ export default function Page() {
                                 {statusLabels[order.status]}
                               </span>
                             </td>
-                            <td className="px-4 py-3">{formatCurrency(order.order_total)}</td>
-                            <td className="px-4 py-3">{formatCurrency(order.amount_paid)}</td>
-                            <td className="px-4 py-3">{formatCurrency(order.amount_due)}</td>
-                            <td className="px-4 py-3">{formatDate(order.due_date)}</td>
+                            <td className="px-4 py-3">{formatCurrency(order.order_total ?? 0)}</td>
+                            <td className="px-4 py-3">{formatCurrency(order.amount_paid ?? 0)}</td>
+                            <td className="px-4 py-3">{formatCurrency(order.amountDue ?? 0)}</td>
+                            <td className="px-4 py-3">{formatDate(order.due_date ?? "N/A")}</td>
                             <td className="px-4 py-3">
                               <div className="flex flex-wrap gap-2">
                                 <Button type="button" variant="outline" size="sm" onClick={() => openModal("view", order)}>
@@ -269,6 +250,20 @@ export default function Page() {
                                   disabled={order.status !== "pending"}
                                 >
                                   Edit
+                                </Button>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setPaymentOrderId(order.id)
+                                    setPaymentModalOpen(true)
+                                  }}
+                                >
+                                  <span className="inline-flex items-center gap-2">
+                                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-md border px-1 text-sm text-muted-foreground">💵</span>
+                                    Payment
+                                  </span>
                                 </Button>
                               </div>
                             </td>
@@ -299,7 +294,7 @@ export default function Page() {
       </SidebarInset>
 
       <Dialog open={modalOpen} onOpenChange={(open) => (open ? undefined : closeModal())}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-auto">
           <DialogHeader>
             <DialogTitle>
               {modalMode === "create" ? "Create order" : modalMode === "edit" ? "Edit order" : "Order details"}
@@ -316,6 +311,15 @@ export default function Page() {
           />
         </DialogContent>
       </Dialog>
+      <PaymentModal
+        open={paymentModalOpen}
+        onOpenChange={setPaymentModalOpen}
+        mode="create"
+        initial={paymentOrderId ? { orderId: paymentOrderId } : undefined}
+        onSaved={async () => {
+          // no-op: payments page handles its own refresh
+        }}
+      />
     </SidebarProvider>
   )
 }

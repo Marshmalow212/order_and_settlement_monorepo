@@ -5,6 +5,7 @@ import { config } from './config.js';
 import { prisma } from './database/prisma-client.js';
 import { logger, loggerMiddleware } from './logger.js';
 import { mainRouter } from './routes/main.router.js';
+import actingUserMiddleware from './middleware/acting-user.middleware.js';
 import { AuditLogRepository } from './repositories/audit-log.repository.js';
 import { LineItemRepository } from './repositories/line-item.repository.js';
 import { OrderRepository } from './repositories/order.repository.js';
@@ -16,10 +17,32 @@ import swaggerUi from 'swagger-ui-express';
 const app = express();
 const port = config.server.port;
 
+// configure CORS for frontend(s)
+const allowedOrigins = config.cors?.allowedOrigins ?? [
+  'http://order-settlement-frontend:3000',
+  'http://localhost:7103',
+  'http://localhost:7101',
+];
+
 app.use(loggerMiddleware);
-app.use(cors());
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // allow requests with no origin (e.g., curl, server-to-server)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
 app.use(json());
 app.use(urlencoded({ extended: true }));
+
+// inject a static acting user for now (user id = 1)
+app.use(actingUserMiddleware);
 
 app.use(`/api/${config.server.version}`, mainRouter);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

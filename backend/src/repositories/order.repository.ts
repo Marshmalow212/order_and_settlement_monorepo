@@ -1,4 +1,5 @@
 import { prisma } from '../database/prisma-client.js';
+import { logger } from '../logger.js';
 import { AuditLogRepository } from './audit-log.repository.js';
 
 export type OrderStatus = 'pending' | 'partially_paid' | 'paid' | 'overdue';
@@ -37,6 +38,7 @@ export const normalizeOrderStatus = (value?: string | number | null): number | u
 
 export interface Order {
   id: number;
+  userId?: number | null;
   customerName: string;
   status: OrderStatus;
   total: number;
@@ -55,6 +57,7 @@ export interface OrderLineItemInput {
 
 export interface CreateOrderInput {
   customerName: string;
+  userId?: number | null;
   order_status?: number | OrderStatus;
   status?: OrderStatus | number;
   total?: number;
@@ -75,11 +78,21 @@ export interface UpdateOrderInput {
 export interface IOrderRepository {
   init(): Promise<void>;
   create(order: CreateOrderInput): Promise<Order>;
-  findAll(): Promise<Order[]>;
+  findAll(userId?: number): Promise<Order[]>;
   findById(id: number): Promise<Order | null>;
   update(id: number, data: UpdateOrderInput): Promise<Order | null>;
   delete(id: number): Promise<boolean>;
   recalculateTotals(id: number): Promise<Order | null>;
+  operationSummary(userId: number): Promise<OperationSummary>;
+}
+
+export interface OperationSummary {
+  ordersCount: number;
+  ordersTotalAmount: number;
+  paymentsTotalAmount: number;
+  ordersPaid: number;
+  ordersPending: number;
+  ordersOverdue: number;
 }
 
 export class OrderRepository implements IOrderRepository {
@@ -91,6 +104,7 @@ export class OrderRepository implements IOrderRepository {
     const normalizedStatus = normalizeOrderStatus(order.order_status ?? order.status ?? 'pending');
     const created = await prisma.order.create({
       data: {
+        ...(order.userId !== undefined ? { userId: order.userId } : {}),
         customer_name: order.customerName,
         due_date: order.dueDate ? new Date(order.dueDate) : null,
         order_status: normalizedStatus ?? ORDER_STATUS_MAP.pending,
@@ -119,13 +133,13 @@ export class OrderRepository implements IOrderRepository {
     // create initial audit log for order creation
     try {
       const raw = await prisma.order.findUnique({ where: { id: final.id } });
-      if (raw) {
+        if (raw) {
         await new AuditLogRepository().create({
-          userId: null,
+          userId: raw.userId ?? 1,
           orderId: raw.id,
-          amount: Number(raw.order_total ?? 0),
+          amount: Number(0),
           items: Number(raw.total_items ?? 0),
-          status: Number(raw.order_status ?? ORDER_STATUS_MAP.pending),
+          status: Number(ORDER_STATUS_MAP.pending),
           lastPaymentDate: null,
         });
       }
@@ -136,8 +150,11 @@ export class OrderRepository implements IOrderRepository {
     return final;
   }
 
-  async findAll(): Promise<Order[]> {
+  findAll(userId?: number): Promise<Order[]>;
+
+  async findAll(userId?: number): Promise<Order[]> {
     const orders = await prisma.order.findMany({
+      where: userId ? { userId } : undefined,
       orderBy: { created_at: 'desc' },
     });
 
@@ -189,6 +206,24 @@ export class OrderRepository implements IOrderRepository {
     }
 
     const refreshed = await this.recalculateTotals(id);
+    // if status did not change (recalculateTotals logs status changes), record an audit log for this edit
+    try {
+      const refreshedRow = refreshed ?? this.mapRow(order);
+      const refreshedNumeric = ORDER_STATUS_MAP[refreshedRow.status] ?? ORDER_STATUS_MAP.pending;
+      if (existing.order_status === refreshedNumeric) {
+        await new AuditLogRepository().create({
+          userId: existing.userId ?? 1,
+          orderId: id,
+          amount: Number(refreshedRow.total ?? 0),
+          items: Number(refreshedRow.totalItems ?? 0),
+          status: Number(refreshedNumeric),
+          lastPaymentDate: null,
+        });
+      }
+    } catch {
+      // swallow audit log errors
+    }
+
     return refreshed ?? this.mapRow(order);
   }
 
@@ -237,9 +272,9 @@ export class OrderRepository implements IOrderRepository {
 
     // if status changed, record audit log
     try {
-      if (existing.order_status !== updated.order_status) {
+        if (existing.order_status !== updated.order_status) {
         await new AuditLogRepository().create({
-          userId: null,
+          userId: existing.userId ?? 1,
           orderId: id,
           amount: Number(orderTotal),
           items: totalItems,
@@ -254,11 +289,34 @@ export class OrderRepository implements IOrderRepository {
     return this.mapRow(updated);
   }
 
+  async operationSummary(userId: number): Promise<OperationSummary> {
+    const ordersCount = await prisma.order.count({ where: { userId } });
+    const sumOrders = await prisma.order.aggregate({ _sum: { order_total: true }, where: { userId } });
+    const ordersTotalAmount = Number(sumOrders._sum.order_total ?? 0);
+
+    const sumPayments = await prisma.paymentTransaction.aggregate({ _sum: { payment_amount: true }, where: { userId } });
+    const paymentsTotalAmount = Number(sumPayments._sum.payment_amount ?? 0);
+
+    const ordersPaid = await prisma.order.count({ where: { userId, order_status: ORDER_STATUS_MAP.paid } });
+    const ordersPending = await prisma.order.count({ where: { userId, order_status: ORDER_STATUS_MAP.pending } });
+    const ordersOverdue = await prisma.order.count({ where: { userId, order_status: ORDER_STATUS_MAP.overdue } });
+
+    return {
+      ordersCount,
+      ordersTotalAmount,
+      paymentsTotalAmount,
+      ordersPaid,
+      ordersPending,
+      ordersOverdue,
+    };
+  }
+
   private mapRow(row: any): Order {
     const statusValue = Number(row.order_status ?? 0);
 
     return {
       id: row.id,
+      userId: row.userId ?? null,
       customerName: row.customer_name,
       status: ORDER_STATUS_LABELS[statusValue] ?? 'pending',
       total: Number(row.order_total ?? row.total ?? 0),

@@ -20,140 +20,17 @@ import { DashboardSquare01Icon, Menu01Icon, ChartHistogramIcon, Folder01Icon, Us
 
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    name: "Mr. Owner",
+    email: "tintin@ttinc.com",
+    avatar: "/avatars/mr_owner.png",
   },
+  // Keep only module-level menus
   navMain: [
-    {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: (
-        <HugeiconsIcon icon={DashboardSquare01Icon} strokeWidth={2} />
-      ),
-    },
-    {
-      title: "Orders",
-      url: "/orders",
-      icon: (
-        <HugeiconsIcon icon={Menu01Icon} strokeWidth={2} />
-      ),
-    },
-    {
-      title: "Payments",
-      url: "/payments",
-      icon: (
-        <HugeiconsIcon icon={Folder01Icon} strokeWidth={2} />
-      ),
-    },
-    // {
-    //   title: "Team",
-    //   url: "#",
-    //   icon: (
-    //     <HugeiconsIcon icon={UserGroupIcon} strokeWidth={2} />
-    //   ),
-    // },
+    { title: "Dashboard", url: "/dashboard", icon: <HugeiconsIcon icon={DashboardSquare01Icon} strokeWidth={2} /> },
+    { title: "Orders", url: "/orders", icon: <HugeiconsIcon icon={Menu01Icon} strokeWidth={2} /> },
+    { title: "Payments", url: "/payments", icon: <HugeiconsIcon icon={Folder01Icon} strokeWidth={2} /> },
+    { title: "Audit Logs", url: "/audit-logs", icon: <HugeiconsIcon icon={Analytics01Icon} strokeWidth={2} /> },
   ],
-  // navClouds: [
-  //   {
-  //     title: "Capture",
-  //     icon: (
-  //       <HugeiconsIcon icon={Camera01Icon} strokeWidth={2} />
-  //     ),
-  //     isActive: true,
-  //     url: "#",
-  //     items: [
-  //       {
-  //         title: "Active Proposals",
-  //         url: "#",
-  //       },
-  //       {
-  //         title: "Archived",
-  //         url: "#",
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     title: "Proposal",
-  //     icon: (
-  //       <HugeiconsIcon icon={File01Icon} strokeWidth={2} />
-  //     ),
-  //     url: "#",
-  //     items: [
-  //       {
-  //         title: "Active Proposals",
-  //         url: "#",
-  //       },
-  //       {
-  //         title: "Archived",
-  //         url: "#",
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     title: "Prompts",
-  //     icon: (
-  //       <HugeiconsIcon icon={File01Icon} strokeWidth={2} />
-  //     ),
-  //     url: "#",
-  //     items: [
-  //       {
-  //         title: "Active Proposals",
-  //         url: "#",
-  //       },
-  //       {
-  //         title: "Archived",
-  //         url: "#",
-  //       },
-  //     ],
-  //   },
-  // ],
-  // navSecondary: [
-  //   {
-  //     title: "Settings",
-  //     url: "#",
-  //     icon: (
-  //       <HugeiconsIcon icon={Settings05Icon} strokeWidth={2} />
-  //     ),
-  //   },
-  //   {
-  //     title: "Get Help",
-  //     url: "#",
-  //     icon: (
-  //       <HugeiconsIcon icon={HelpCircleIcon} strokeWidth={2} />
-  //     ),
-  //   },
-  //   {
-  //     title: "Search",
-  //     url: "#",
-  //     icon: (
-  //       <HugeiconsIcon icon={SearchIcon} strokeWidth={2} />
-  //     ),
-  //   },
-  // ],
-  // documents: [
-  //   {
-  //     name: "Data Library",
-  //     url: "#",
-  //     icon: (
-  //       <HugeiconsIcon icon={Database01Icon} strokeWidth={2} />
-  //     ),
-  //   },
-  //   {
-  //     name: "Reports",
-  //     url: "#",
-  //     icon: (
-  //       <HugeiconsIcon icon={Analytics01Icon} strokeWidth={2} />
-  //     ),
-  //   },
-  //   {
-  //     name: "Word Assistant",
-  //     url: "#",
-  //     icon: (
-  //       <HugeiconsIcon icon={File01Icon} strokeWidth={2} />
-  //     ),
-  //   },
-  // ],
 }
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -173,8 +50,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        {/* <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

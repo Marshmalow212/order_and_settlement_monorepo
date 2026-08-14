@@ -8,6 +8,7 @@ export interface AppConfig {
     port: number;
     version: string;
   };
+  cors: any;
   database: {
     host: string;
     port: number;
@@ -29,6 +30,10 @@ export const config: AppConfig = {
   server: {
     port: Number(process.env.PORT ?? 3000),
     version: process.env.API_VERSION ?? 'v1',
+  },
+  cors: {
+    // Comma-separated list of allowed origins, e.g. "http://localhost:7103,http://order-settlement-frontend:3000"
+    allowedOrigins: (process.env.ALLOWED_ORIGINS ?? 'http://order-settlement-frontend:3000,http://localhost:7103,http://localhost:7101').split(',').map((s) => s.trim()),
   },
   database: {
     host: process.env.POSTGRES_HOST ?? 'postgresdb',

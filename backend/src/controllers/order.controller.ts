@@ -9,6 +9,7 @@ export class OrderController {
   }
 
   static async create(req: Request, res: Response) {
+    const actingUserId = req.userId ?? 1;
     const { customerName, status, total, dueDate, lineItems } = req.body;
 
     if (!customerName) {
@@ -21,6 +22,7 @@ export class OrderController {
 
     const order = await service.createOrder({
       customerName,
+      userId: actingUserId,
       status,
       total: total ?? 0,
       dueDate,
@@ -29,9 +31,16 @@ export class OrderController {
     return res.status(201).json(order);
   }
 
-  static async list(_req: Request, res: Response) {
-    const orders = await service.listOrders();
+  static async list(req: Request, res: Response) {
+    const actingUserId = req.userId ?? 1;
+    const orders = await service.listOrders(actingUserId);
     return res.json(orders);
+  }
+
+  static async operationSummary(req: Request, res: Response) {
+    const actingUserId = req.userId ?? 1;
+    const summary = await service.operationSummary(actingUserId);
+    return res.json(summary);
   }
 
   static async getById(req: Request, res: Response) {
@@ -40,8 +49,9 @@ export class OrderController {
       return res.status(400).json({ message: 'Invalid id parameter' });
     }
 
+    const actingUserId = req.userId ?? 1;
     const order = await service.getOrderById(id);
-    if (!order) {
+    if (!order || order.userId !== actingUserId) {
       return res.status(404).json({ message: 'Order not found' });
     }
 
@@ -54,7 +64,14 @@ export class OrderController {
       return res.status(400).json({ message: 'Invalid id parameter' });
     }
 
+    const actingUserId = req.userId ?? 1;
     const { customerName, status, total, amountPaid, dueDate, lineItems } = req.body;
+
+    const existing = await service.getOrderById(id);
+    if (!existing || existing.userId !== actingUserId) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
     const order = await service.updateOrder(id, {
       customerName,
       status,
@@ -75,6 +92,12 @@ export class OrderController {
     const id = Number(req.params.id);
     if (Number.isNaN(id) || id <= 0) {
       return res.status(400).json({ message: 'Invalid id parameter' });
+    }
+
+    const actingUserId = req.userId ?? 1;
+    const existing = await service.getOrderById(id);
+    if (!existing || existing.userId !== actingUserId) {
+      return res.status(404).json({ message: 'Order not found' });
     }
 
     const deleted = await service.deleteOrder(id);

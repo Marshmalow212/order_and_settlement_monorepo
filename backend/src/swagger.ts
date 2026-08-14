@@ -134,7 +134,8 @@ const swaggerDefinition = {
     '/orders': {
       get: {
         tags: ['Orders'],
-        summary: 'List all orders',
+        summary: 'List orders for acting user',
+        description: 'Returns orders owned by the acting user (middleware injects userId for now).',
         responses: { '200': { description: 'Orders retrieved successfully' } },
       },
       post: {
@@ -149,6 +150,7 @@ const swaggerDefinition = {
                 type: 'object',
                 required: ['customerName', 'lineItems'],
                 properties: {
+                  userId: { type: 'integer', nullable: true, example: 1 },
                   customerName: { type: 'string', example: 'Alice Smith' },
                   status: {
                     type: 'string',
@@ -180,6 +182,33 @@ const swaggerDefinition = {
           },
         },
         responses: { '201': { description: 'Order created' }, '400': { description: 'Bad request' } },
+      },
+    },
+    '/orders/operation_summary': {
+      get: {
+        tags: ['Orders'],
+        summary: 'Operation summary for acting user',
+        description: 'Returns aggregated metrics for the acting user: counts and sums for orders and payments.',
+        responses: {
+          '200': {
+            description: 'Operation summary retrieved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    ordersCount: { type: 'integer', example: 12 },
+                    ordersTotalAmount: { type: 'number', example: 1250.5 },
+                    paymentsTotalAmount: { type: 'number', example: 800.25 },
+                    ordersPaid: { type: 'integer', example: 5 },
+                    ordersPending: { type: 'integer', example: 6 },
+                    ordersOverdue: { type: 'integer', example: 1 },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     },
     '/orders/{id}': {
@@ -319,6 +348,7 @@ const swaggerDefinition = {
                 type: 'object',
                 required: ['orderId', 'paymentAmount'],
                 properties: {
+                  userId: { type: 'integer', nullable: true, example: 1 },
                   orderId: { type: 'integer', example: 1 },
                   paymentAmount: { type: 'number', example: 75.25 },
                   note: { type: 'string', nullable: true, example: 'Partial payment' },

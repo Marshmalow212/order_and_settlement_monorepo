@@ -51,10 +51,10 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
+  User: 'User',
   Order: 'Order',
   LineItem: 'LineItem',
   PaymentTransaction: 'PaymentTransaction',
-  User: 'User',
   AuditLog: 'AuditLog'
 } as const
 
@@ -74,8 +74,21 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
+export const UserScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  password: 'password',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
 export const OrderScalarFieldEnum = {
   id: 'id',
+  userId: 'userId',
   customer_name: 'customer_name',
   due_date: 'due_date',
   order_status: 'order_status',
@@ -105,6 +118,7 @@ export type LineItemScalarFieldEnum = (typeof LineItemScalarFieldEnum)[keyof typ
 
 export const PaymentTransactionScalarFieldEnum = {
   id: 'id',
+  userId: 'userId',
   orderId: 'orderId',
   payment_amount: 'payment_amount',
   payment_date: 'payment_date',
@@ -114,18 +128,6 @@ export const PaymentTransactionScalarFieldEnum = {
 } as const
 
 export type PaymentTransactionScalarFieldEnum = (typeof PaymentTransactionScalarFieldEnum)[keyof typeof PaymentTransactionScalarFieldEnum]
-
-
-export const UserScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  email: 'email',
-  password: 'password',
-  created_at: 'created_at',
-  updated_at: 'updated_at'
-} as const
-
-export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
 export const AuditLogScalarFieldEnum = {

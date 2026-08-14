@@ -2,6 +2,7 @@ import { prisma } from '../database/prisma-client.js';
 
 export interface PaymentTransaction {
   id: number;
+  userId?: number | null;
   orderId: number;
   paymentAmount: number;
   paymentDate: Date;
@@ -14,6 +15,7 @@ export interface CreatePaymentTransactionInput {
   orderId: number;
   paymentAmount: number;
   note?: string | null;
+  userId?: number | null;
 }
 
 export interface UpdatePaymentTransactionInput {
@@ -25,9 +27,9 @@ export interface UpdatePaymentTransactionInput {
 export interface IPaymentTransactionRepository {
   init(): Promise<void>;
   create(input: CreatePaymentTransactionInput): Promise<PaymentTransaction>;
-  findAll(): Promise<PaymentTransaction[]>;
+  findAll(userId?: number): Promise<PaymentTransaction[]>;
   findById(id: number): Promise<PaymentTransaction | null>;
-  findByOrderId(orderId: number): Promise<PaymentTransaction[]>;
+  findByOrderId(orderId: number, userId?: number): Promise<PaymentTransaction[]>;
   update(id: number, data: UpdatePaymentTransactionInput): Promise<PaymentTransaction | null>;
   delete(id: number): Promise<boolean>;
 }
@@ -40,6 +42,7 @@ export class PaymentTransactionRepository implements IPaymentTransactionReposito
   async create(input: CreatePaymentTransactionInput): Promise<PaymentTransaction> {
     const transaction = await prisma.paymentTransaction.create({
       data: {
+        ...(input.userId !== undefined ? { userId: input.userId } : {}),
         orderId: input.orderId,
         payment_amount: Number(input.paymentAmount),
         note: input.note ?? null,
@@ -49,8 +52,8 @@ export class PaymentTransactionRepository implements IPaymentTransactionReposito
     return this.mapRow(transaction);
   }
 
-  async findAll(): Promise<PaymentTransaction[]> {
-    const transactions = await prisma.paymentTransaction.findMany({ orderBy: { payment_date: 'desc' } });
+  async findAll(userId?: number): Promise<PaymentTransaction[]> {
+    const transactions = await prisma.paymentTransaction.findMany({ where: userId ? { userId } : undefined, orderBy: { payment_date: 'desc' } });
     return transactions.map(this.mapRow);
   }
 
@@ -59,9 +62,11 @@ export class PaymentTransactionRepository implements IPaymentTransactionReposito
     return transaction ? this.mapRow(transaction) : null;
   }
 
-  async findByOrderId(orderId: number): Promise<PaymentTransaction[]> {
+  async findByOrderId(orderId: number, userId?: number): Promise<PaymentTransaction[]> {
+    const where: any = { orderId };
+    if (userId !== undefined) where.userId = userId;
     const transactions = await prisma.paymentTransaction.findMany({
-      where: { orderId },
+      where,
       orderBy: { payment_date: 'desc' },
     });
     return transactions.map(this.mapRow);
@@ -92,6 +97,7 @@ export class PaymentTransactionRepository implements IPaymentTransactionReposito
   private mapRow(row: any): PaymentTransaction {
     return {
       id: row.id,
+      userId: row.userId ?? null,
       orderId: row.orderId,
       paymentAmount: Number(row.payment_amount),
       paymentDate: new Date(row.payment_date),

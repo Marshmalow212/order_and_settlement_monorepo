@@ -16,17 +16,18 @@ Base URL
   - Example when calling from another container on the same Docker network: `http://order-settlement-backend:3000/api/v1` (container name `order-settlement-backend`, internal port `3000` per `docker-compose.yml`).
 
 Notes
-- No authentication header is enforced by these endpoints in the current implementation. If you have an authenticated front-end, include the user's id in request bodies where relevant (see flows below).
+- Authentication & user scoping: all `Order`, `PaymentTransaction`, and `AuditLog` operations are user-scoped. The app currently uses a temporary acting-user middleware that injects `userId = 1` into every request; replace this with real auth in production. For now the frontend does not need to pass credentials — the server treats requests as coming from the acting user.
+- Ownership enforcement: read/update/delete and list operations are restricted to resources owned by the acting user. Attempts to access or modify resources owned by another user will return `404` (or `403` for specific audit-log endpoints where applicable).
+- Creation behavior: create endpoints accept an optional `userId` in the request body but will default to the acting user if omitted. The backend persists `userId` on created `Order` and `PaymentTransaction` records and includes it in responses.
 - The database stores `order_status` as an integer. API responses map that integer to a string label: 0 = `pending`, 1 = `partially_paid`, 2 = `paid`, 3 = `overdue`.
-- Where the backend does not record `userId` directly on an `Order` or `PaymentTransaction`, we recommend using `AuditLog` entries to link a user to an order/payment.
 
 Common headers
 - `Content-Type: application/json`
 
 Models (summary)
-- Order (response): { id, customerName, status, total, createdAt, dueDate, amountPaid, amountDue, totalItems }
+- Order (response): { id, userId?, customerName, status, total, createdAt, dueDate, amountPaid, amountDue, totalItems }
 - LineItem (create payload): { description, unitPrice, quantity, orderId }
-- Payment create payload: { orderId, paymentAmount, note }
+- Payment create payload: { userId?, orderId, paymentAmount, note }
 - AuditLog (create payload): { userId?, orderId?, amount, items, status, lastPaymentDate? }
 
 ---
@@ -40,6 +41,7 @@ Models (summary)
 - Request body
 ```json
 {
+  "userId": 1,                 // optional: acting user will be used if omitted
   "customerName": "Jane Doe",
   "status": "pending",          // optional; accepts number or string
   "total": 0,                    // optional: derived on backend from lineItems
@@ -55,6 +57,7 @@ Models (summary)
 ```json
 {
   "id": 12,
+  "userId": 1,
   "customerName": "Jane Doe",
   "status": "pending",
   "total": 90.0,
@@ -68,7 +71,8 @@ Models (summary)
 
 - Frontend notes
   - Backend creates the Order record, then creates the provided LineItems and recalculates totals.
-  - The backend also creates an `AuditLog` entry for the creation (userId currently null by default). If you want to record which user created the order, make a separate `POST /audit-logs` after order creation with `userId` and `orderId`.
+  - The backend persists `userId` on the created order when provided, otherwise the acting user (1) is used.
+  - The backend also creates an `AuditLog` entry for the creation and includes the order's `userId` (falls back to acting user 1).
 
 ---
 
@@ -104,47 +108,27 @@ Same shape as the Order response shown in (1).
 
 3) Order Listing based on User
 
-There is no direct `GET /orders?userId=...` endpoint in the current implementation because the `Order` model does not contain `userId`. Recommended frontend approaches:
+GET /orders returns orders for the acting user (middleware-injected user). The frontend should call GET /orders (no userId query required) to list the current user's orders.
 
-A) Find orders touched by a user using AuditLog (recommended):
-  1. GET /audit-logs/user/{userId} → receives audit entries containing `orderId`.
-  2. For each unique `orderId` call GET /orders/{id} to fetch order details.
-
-- Endpoints used
-  - GET /audit-logs/user/{userId}
-  - GET /orders/{id}
-
-- Example sequence (pseudo-code)
+Example (pseudo-code) — current recommended flow to list the acting user's orders:
 ```js
-// 1) Get audit log entries for user
-const logs = await fetch(`${base}/audit-logs/user/${userId}`).then(r => r.json());
-const orderIds = [...new Set(logs.map(l => l.orderId).filter(Boolean))];
-// 2) Fetch orders concurrently
-const orders = await Promise.all(orderIds.map(id => fetch(`${base}/orders/${id}`).then(r => r.json())));
+const orders = await fetch(`${base}/orders`).then(r => r.json());
 ```
-
-B) If you control backend changes: add a `userId` on `Order` or a dedicated `GET /orders?userId=` route — the repo currently does not provide this.
 
 ---
 
 4) Payment Listing based on User
 
-Payments do not include `userId` in the `PaymentTransaction` model. To list payments related to a user, tie the user to orders (via `AuditLog` or by adding `userId` to `Order`) and fetch payments per order:
+Payments persist an optional `userId` on creation. `GET /payments` and `GET /payments/order/{orderId}` return only payments belonging to the acting user. To list payments for the acting user:
 
-- Recommended flow
-  1. Get user-related orders (see step 3)
-  2. For each order call GET /payments/order/{orderId}
-
-- Endpoint
-  - GET /payments/order/{orderId}
-
-- Example (pseudo-code)
 ```js
-const payments = [];
-for (const order of orders) {
-  const p = await fetch(`${base}/payments/order/${order.id}`).then(r => r.json());
-  payments.push(...p);
-}
+const payments = await fetch(`${base}/payments`).then(r => r.json());
+```
+
+To list payments for a specific order (acting user only):
+
+```js
+const payments = await fetch(`${base}/payments/order/${orderId}`).then(r => r.json());
 ```
 
 ---
@@ -153,11 +137,12 @@ for (const order of orders) {
 
 - Endpoint
   - POST /payments
-  - Body: `{ orderId, paymentAmount, note? }`
+  - Body: `{ userId?, orderId, paymentAmount, note? }`
 
 - Example request
 ```json
 {
+  "userId": 1,
   "orderId": 12,
   "paymentAmount": 50.0,
   "note": "Partial payment"
@@ -168,6 +153,7 @@ for (const order of orders) {
 ```json
 {
   "id": 7,
+  "userId": 1,
   "orderId": 12,
   "paymentAmount": 50.0,
   "paymentDate": "2026-08-14T12:15:00.000Z",
@@ -178,16 +164,33 @@ for (const order of orders) {
 ```
 
 - Recording the acting user
-  - The payment model currently does not record `userId`. To associate the payment with a user in the frontend flow, POST an `AuditLog` after creating the payment:
-    - POST /audit-logs with `{ userId, orderId, amount: paymentAmount, items: 0, status: currentOrderStatus }`.
+  - If `userId` is omitted when creating a payment, the acting user (1) is recorded. You may pass `userId` in the create body for clarity, but the server will use the acting user if omitted.
+  - The backend also creates/maintains `AuditLog` records for payments and status changes.
+
+Note: Payments that would exceed the order's `amountDue` are rejected with a 400 and message: "Payment amount exceeds amount due".
+Also, `paymentAmount` must be numeric and greater than 0.1; otherwise the API returns 400 with message: "paymentAmount must be greater than 0.1".
+
+Payment side-effects
+- Each successful payment updates the parent `Order`: `amountPaid` is incremented, `amountDue` is recalculated, and `status` is updated according to business rules (pending, partially_paid, paid, overdue). The backend also records an `AuditLog` entry with the payment date.
+
+Operation summary endpoint
+- `GET /orders/operation_summary` — Returns aggregated metrics for the acting user (filtered by `userId`):
+  - `ordersCount`: number of orders owned by the acting user
+  - `ordersTotalAmount`: sum of all order totals for the acting user
+  - `paymentsTotalAmount`: sum of all payments made by the acting user
+  - `ordersPaid`: number of orders in `paid` status
+  - `ordersPending`: number of orders in `pending` status
+  - `ordersOverdue`: number of orders in `overdue` status
+
+Example: `GET /orders/operation_summary` returns a JSON object with the fields above for the acting user (middleware injects `userId=1` by default in development).
 
 ---
 
 6) Audit logs listing based on User
 
 - Endpoint(s)
-  - GET /audit-logs/user/{userId}            — all audit logs for a user
-  - GET /audit-logs/user/{userId}/order/{orderId} — audit logs for a user filtered to a specific order
+  - GET /audit-logs/user/{userId}            — all audit logs for a user (only allowed for acting user)
+  - GET /audit-logs/user/{userId}/order/{orderId} — audit logs for a user filtered to a specific order (only allowed for acting user)
 
 - Example response (array)
 ```json
@@ -198,7 +201,7 @@ for (const order of orders) {
     "orderId": 12,
     "amount": 90.0,
     "items": 3,
-    "status": 0,                
+    "status": 0,
     "lastPaymentDate": null,
     "createdAt": "2026-08-14T12:00:01.000Z",
     "updatedAt": "2026-08-14T12:00:01.000Z"
@@ -227,17 +230,15 @@ async function createOrder(payload) {
   return res.json();
 }
 
-async function getOrdersForUser(userId) {
-  const logs = await fetch(`${base}/audit-logs/user/${userId}`).then(r => r.json());
-  const ids = [...new Set(logs.map(l => l.orderId).filter(Boolean))];
-  return Promise.all(ids.map(id => fetch(`${base}/orders/${id}`).then(r => r.json())));
+async function getOrdersForUser() {
+  return fetch(`${base}/orders`).then(r => r.json());
 }
 ```
 
 Notes & next steps
-- If your frontend requires first-class `userId` on `Order` and `PaymentTransaction`, consider a small backend change to add `userId` to `orders` or `payments` or provide query endpoints like `GET /orders?userId=` and `GET /payments?userId=`. That will simplify list operations and avoid multiple round-trips.
+- If your frontend requires admin-style queries for other users, consider adding dedicated admin endpoints (e.g., `GET /orders?userId=`) or expanding `GET /audit-logs` filtering.
 - If you want, I can also generate OpenAPI/Swagger snippets or Postman collection from the current `src/swagger.ts` definitions.
 
 ---
 
-File created: `docs/API_INTEGRATION.md`
+File updated: `docs/API_INTEGRATION.md`
