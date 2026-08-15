@@ -47,6 +47,15 @@ For details and full API overview see [API integration docs](docs/API_INTEGRATIO
 * Audit-logs - will be easy to trace money trail
 * Payment notes - helpful for keeping short and crucial information
 
+## AI Agent Utilization
+
+* Scaffolding with structure
+* development of API and Frontend Components
+* Rest of the boring stuff 
+
+### Core business logics, test results, edge-case checks done by human :-)
+
+
 # Improvements
 
 * Authentication and Authorization, Multi-Tenant
