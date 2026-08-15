@@ -3,12 +3,16 @@ import { AuditLogService, IAuditLogService } from '../services/audit-log.service
 
 const service: IAuditLogService = new AuditLogService();
 
+interface IRequest extends Request {
+  userId?: number;
+}
+
 export class AuditLogController {
   static async init() {
     await service.init();
   }
 
-  static async create(req: Request, res: Response) {
+  static async create(req: IRequest, res: Response) {
     const actingUserId = req.userId ?? 1;
     const { userId, orderId, amount, items, status, lastPaymentDate } = req.body;
 
@@ -20,13 +24,13 @@ export class AuditLogController {
     return res.status(201).json(log);
   }
 
-  static async list(req: Request, res: Response) {
+  static async list(req: IRequest, res: Response) {
     const actingUserId = req.userId ?? 1;
     const logs = await service.listAuditLogs(actingUserId);
     return res.json(logs);
   }
 
-  static async getById(req: Request, res: Response) {
+  static async getById(req: IRequest, res: Response) {
     const id = Number(req.params.id);
     if (Number.isNaN(id) || id <= 0) {
       return res.status(400).json({ message: 'Invalid id parameter' });
@@ -41,7 +45,7 @@ export class AuditLogController {
     return res.json(log);
   }
 
-  static async getByUserId(req: Request, res: Response) {
+  static async getByUserId(req: IRequest, res: Response) {
     const actingUserId = req.userId ?? 1;
     const userId = Number(req.params.userId);
     if (Number.isNaN(userId) || userId <= 0) {
@@ -56,7 +60,7 @@ export class AuditLogController {
     return res.json(logs);
   }
 
-  static async getByUserAndOrder(req: Request, res: Response) {
+  static async getByUserAndOrder(req: IRequest, res: Response) {
     const actingUserId = req.userId ?? 1;
     const userId = Number(req.params.userId);
     const orderId = Number(req.params.orderId);
@@ -72,7 +76,7 @@ export class AuditLogController {
     return res.json(logs);
   }
 
-  static async update(req: Request, res: Response) {
+  static async update(req: IRequest, res: Response) {
     const id = Number(req.params.id);
     if (Number.isNaN(id) || id <= 0) {
       return res.status(400).json({ message: 'Invalid id parameter' });
@@ -92,7 +96,7 @@ export class AuditLogController {
     return res.json(log);
   }
 
-  static async remove(req: Request, res: Response) {
+  static async remove(req: IRequest, res: Response) {
     const id = Number(req.params.id);
     if (Number.isNaN(id) || id <= 0) {
       return res.status(400).json({ message: 'Invalid id parameter' });
