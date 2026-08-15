@@ -1,9 +1,13 @@
-import { Request, Response } from 'express';
+import { Request as IRequest, Response } from 'express';
 import { IPaymentTransactionService, PaymentTransactionService } from '../services/payment-transaction.service.js';
 import { IOrderService, OrderService } from '../services/order.service.js';
 
 const service: IPaymentTransactionService = new PaymentTransactionService();
 const orderService: IOrderService = new OrderService();
+
+interface Request extends IRequest {
+  userId?: number;
+}
 
 export class PaymentTransactionController {
   static async init() {

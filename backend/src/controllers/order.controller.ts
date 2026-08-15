@@ -1,7 +1,11 @@
-import { Request, Response } from 'express';
+import { Request as IRequest, Response } from 'express';
 import { IOrderService, OrderService } from '../services/order.service.js';
 
 const service: IOrderService = new OrderService();
+
+interface Request extends IRequest {
+  userId?: number;
+}
 
 export class OrderController {
   static async init() {
