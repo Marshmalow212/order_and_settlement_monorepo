@@ -5,12 +5,13 @@
             "framework": "nextjs"
         },
         "backend": {
-            "root": "backend"
+            "root": "backend",
+            "framework":"express"
         }
     },
     "rewrites": [
         {
-            "source": "/api/backend(/.*)?",
+            "source": "/api/v1(/.*)?",
             "destination": {
                 "type": "service",
                 "service": "backend"
