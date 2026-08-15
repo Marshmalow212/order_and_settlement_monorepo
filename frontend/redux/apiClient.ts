@@ -19,8 +19,7 @@ api.interceptors.response.use(
     (error) => {
         const apiMsg = error?.response?.data?.message ?? error?.response?.data?.msg ?? error?.message ?? "API request failed"
         try {
-            // @ts-ignore
-            toast.error(`❗ ${String(apiMsg)}`, { action: { label: "Dismiss" } })
+            toast.error(`❗ ${String(apiMsg)}`)
         } catch (e) {
             // If toast cannot be called (server environment), ignore
         }
