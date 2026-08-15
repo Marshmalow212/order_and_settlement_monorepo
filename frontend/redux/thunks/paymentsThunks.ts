@@ -25,7 +25,7 @@ export const createPayment = (payload: Partial<PaymentRecord>) => async (dispatc
     const apiMsg = err?.response?.data?.message ?? err?.response?.data?.msg ?? err?.message ?? "Failed to create payment"
     dispatch(setError(apiMsg))
     dispatch(setLoading(false))
-    toast.error(`❗ ${String(apiMsg)}`, { action: { label: "Dismiss" } })
+    toast.error(`❗ ${String(apiMsg)}`)
     return null
   }
 }
@@ -47,7 +47,7 @@ export const fetchPaymentsForOrder = (orderId: number) => async (dispatch: AppDi
     const apiMsg = err?.response?.data?.message ?? err?.message ?? "Failed to fetch payments"
     dispatch(setError(apiMsg))
     dispatch(setLoading(false))
-    toast.error(`❗ ${String(apiMsg)}`, { action: { label: "Dismiss" } })
+    toast.error(`❗ ${String(apiMsg)}`)
     return null
   }
 }
@@ -69,7 +69,7 @@ export const fetchAllPayments = () => async (dispatch: AppDispatch) => {
     const apiMsg = err?.response?.data?.message ?? err?.message ?? "Failed to fetch payments"
     dispatch(setError(apiMsg))
     dispatch(setLoading(false))
-    toast.error(`❗ ${String(apiMsg)}`, { action: { label: "Dismiss" } })
+    toast.error(`❗ ${String(apiMsg)}`)
     return null
   }
 }
