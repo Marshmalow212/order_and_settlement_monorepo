@@ -27,6 +27,8 @@ services:
     volumes:
       - ./frontend:/app
     command: sh -c "npm install && npm run dev"
+    depends_on:
+      - backend
     networks:
       - order-settlement-network
 
