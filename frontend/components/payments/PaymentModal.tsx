@@ -74,7 +74,7 @@ export default function PaymentModal({
         } catch (err: any) {
           console.error(err)
           const apiMsg = err?.response?.data?.message ?? err?.response?.data?.msg ?? err?.message ?? "Failed to save payment"
-          toast.error(`❗ ${String(apiMsg)}`, { action: { label: "Dismiss" } })
+          toast.error(`❗ ${String(apiMsg)}`)
           onOpenChange(false)
           return
         }
