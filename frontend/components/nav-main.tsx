@@ -1,6 +1,5 @@
 "use client"
 
-import { useRouter } from "next/navigation"
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -9,9 +8,6 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-const openInvoiceModal = (router: ReturnType<typeof useRouter>) => {
-  router.push("/orders?modal=create")
-}
 
 export function NavMain({
   items,
